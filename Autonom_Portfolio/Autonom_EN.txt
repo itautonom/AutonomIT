@@ -1,10 +1,12 @@
+English translation:
+
 PORTFOLIO
 ==================================================
 TEAM SERVICES
 ==================================================
 
-The team undertakes large and complex projects, including long-term development.
-We close most of the tasks on a turnkey basis, and select the team for the project.
+The team takes on large and complex projects, including long-term development.
+We handle most tasks turnkey — we select the stack and team composition for the project.
 
 Development:
 - Programs and applications
@@ -12,62 +14,60 @@ Development:
 - Online stores and marketplaces
 - SaaS, CRM, ERP and corporate portals
 - Games and game projects (PC, mobile, Web, 2D/3D, multiplayer)
-- Mobile applications (iOS, Android, cross‑platform)
+- Mobile applications (iOS, Android, cross-platform)
 - Automation of tasks and business processes
 - Bots and parsers
 - APIs and integrations
-- Refinement and optimization of existing projects
+- Improvement and optimization of existing projects
 - Bug fixing and technical support
+- Presentations for educational purposes
 
-Development of a project from scratch:
-
+Project development from scratch:
 - Brief and task analysis
-- Prototype and technical requirements
+- Prototype and technical specification
 - Design and layout
 - Development
 - Testing
-- Publication and setup
+- Publication and configuration
 - Support and development
 
 AI solutions:
-
 - Chatbots and assistants
 - Content generation
 - Data analysis
 - Support automation
-- AI implementation in existing projects
+- Implementation of AI into existing projects
 
 Design:
 - UI/UX design
 - Branding, logos
 - Prototypes and design systems
-- Presentations and visual design
+- Presentations (PDF, HTML) and formatting
 
 DevOps and infrastructure:
-
 - Project deployment
 - CI/CD, Docker, Kubernetes
-- Server, domain, SSL, and backup setup
+- Setup of servers, domains, SSL, backups
 - Monitoring and scaling
 
 SEO and traffic:
 - SEO audit and promotion
 - Content and content plan
 - Advertising and analytics
-- Publishing on Google and Yandex
+- Publication in Google and Yandex
 
 Support and development:
 - Project maintenance
 - Regular updates
-- Improvements and bug fixes
+- Improvements and bug fixing
 - Consultations and training
 - Blog management
 
-Additional:
+Additionally:
 - Blog creation
 - Technical support
 - Regular updates
-- Further development of the project
+- Further project development
 - Outsourcing / outstaffing — dedicated developers and teams
 
 ==================================================
@@ -114,7 +114,7 @@ APIs and integrations:
 
 AI and data:
 - OpenAI API, LLM, prompt engineering
-- Data parsing and processing
+- Parsing and data processing
 - Pandas, NumPy
 - PyTorch, TensorFlow
 - ML, NLP, CV
@@ -147,42 +147,76 @@ FIRMWARE AND MICROCONTROLLERS
 
 Services:
 
-- Firmware development for microcontrollers
+- Development of firmware for microcontrollers
   (Arduino, ESP32, STM32, AVR, PIC, RP2040)
-- Firmware for Raspberry Pi and single‑board computers
+- Firmware for Raspberry Pi and single-board computers
 - Work with peripherals: sensors, motors, servos,
   relays, displays, buttons, encoders
 - Communication protocols: UART, I2C, SPI, CAN, Modbus, 1-Wire
-- Wireless connection: Wi-Fi, Bluetooth/BLE, LoRa, RF
-- Firmware of ready-made devices (rooters, cameras, printers)
-- Device recovery after failed firmware
+- Wireless communication: Wi-Fi, Bluetooth / BLE, LoRa, RF
+- Flashing of ready-made devices (routers, cameras, printers)
+- Recovery of devices after failed flashing
 - Optimization for low memory and low power consumption
 - Bootloader and offline updates (SD, USB, local server)
 - Debugging: JTAG, SWD, ST-Link, logic analyzers
 
 Technologies:
 
-- Languages: C, C++, MicroPython, CircuitPython, assembly language
+- Languages: C, C++, MicroPython, CircuitPython, assembler
 - Environments: Arduino IDE, PlatformIO, STM32CubeIDE, MPLAB, VS Code
 - OS: FreeRTOS, Zephyr, bare-metal
 - Platforms: Arduino, ESP32 / ESP8266, STM32, RP2040, ATmega, PIC
-- PCB design: KiCad, EasyEDA
+- Board design: KiCad, EasyEDA
 
 Offline direction:
 
 - Firmware without clouds and external services
 - Fully autonomous devices
-- Updates without an internet connection
+- Updates without internet
 - Operation in isolated and industrial systems
 
-And other technologies — we select the stack to suit the project.
+Work with office files
+- .docx, .docm, .dotx, .dotm, .xlsx, .xlsm, .xltx, .xltm, .xlsb, .xlam, .pptx, .pptm,
+.potx, .potm, .ppam, .ppsx, .ppsm, .sldx, .sldm, .thmx, Normal.dotm, Book.xltx, Blank.potx
+
+And other technologies — we select the stack for the project.
+
+==================================================
+PRESENTATIONS
+==================================================
+
+What we do:
+- Presentations on any topics — educational, business,
+  commercial, technical
+- Structure, script and slide text
+- Design, infographics, schemes, diagrams
+- Selection and processing of images, icons, illustrations
+- Adaptation to corporate identity and brand book
+- Pitch decks for investors and project defenses
+- Commercial proposals, catalogs, reports
+- Educational presentations and presentations for conferences
+
+Delivery formats:
+- PDF — for showing, printing and sending
+- HTML — interactive presentation in the browser
+- HTML version works offline, without installing software
+- Responsive for phone, tablet and projector
+- Animations and transitions in the HTML version
+- Source files on request (Figma, PPTX)
+
+Technologies:
+- HTML5, CSS3, JavaScript
+- Reveal.js, Impress.js
+- Figma for layouts and design
+- Export to PDF without quality loss
+- Graphics: SVG, Canvas, Chart.js
 
 ==================================================
 HOW WE WORK
 ==================================================
 
-1. Brief and task discussion
-2. Assessment and technical specifications
+1. Brief and discussion of the task
+2. Estimate and technical specification
 3. Prototype and design
 4. Development
 5. Testing
@@ -191,74 +225,79 @@ HOW WE WORK
 
 Work formats:
 - Fixed price
-- Hourly payment
+- Hourly rate
 - Subscription / long-term contract
 
 Guarantees:
-- Agreement
-- Work by stages
-- Edits within the framework of the TOR
-- Support after the completion of the project
+- Contract
+- Work in stages
+- Revisions within the technical specification
+- Support after project delivery
 
 ==================================================
-WORKING CONDITIONS OF THE TEAM
+TEAM WORKING CONDITIONS
 ==================================================
 
-1. We receive the application
-2. We discuss the price and terms
-3. We do the work according to the TOR
-4. Showing the result
-5. We receive the payment
-6. The project goes to you
-7. To continue — updates, support,
-   development — we are negotiating a contract
+1. We receive the request
+2. We agree on price and deadlines
+3. We perform the work according to the technical specification
+4. We show the result
+5. We receive payment
+6. The project transfers to you
+7. For continuation — updates, support,
+   development — we agree on a contract
 
 --------------------------------------------------
 
-Everything is transparent and step-by-step.
-The project is completely yours after payment.
-Further support is provided under a separate agreement.
+Everything is transparent and staged.
+The project is fully yours after payment.
+Further maintenance — under a separate contract.
 ==================================================
-EDITS AND DEADLINES
+REVISIONS AND DEADLINES
 ==================================================
 
-EDITS
+REVISIONS
 
-- 2 free rounds of edits within the TOR
-- Edits in excess of the TOR — are paid separately
-- Change of TK in the process = revision of the price and terms
-- Minor edits along the way — free of charge
+- 2 free rounds of revisions within the technical specification
+- Revisions beyond the technical specification are paid separately
+- Changes to the technical specification during the process = revision of price and deadlines
+- Minor revisions during work — free
 
 --------------------------------------------------
 DEADLINES
 --------------------------------------------------
 
-- Deadlines are fixed after the approval of the TOR
-- Delays caused by the customer (no response, no
-  materials) the deadline is being shifted
-- Urgency ("it is necessary yesterday") — margin +30-100%
-- We will notify you in advance about any delays.
-- If we are late due to our own fault, you will receive a 30% discount.
+- Deadlines are fixed after approval of the technical specification
+- Delays due to the customer (no response, no
+  materials) shift the deadline
+- Urgency ("needed yesterday") — surcharge +30–100%
+- We warn about delays in advance
+- If we are late due to our fault — 30% discount
 
 ==================================================
 CURRENT SERVICES
 ==================================================
-- Single‑page website — from 1,000 RUB (5/5)
-- Multi‑page website — from 2,000 RUB (5/5)
-- Windows program (.exe) — from 3,000 RUB (4/5)
-- Special tasks / with AI — from 1,500 ₽ or in person (3/5)
+- One-page website — from 1,000 ₽ (5/5)
+- Multi-page website — from 2,000 ₽ (5/5)
+- Windows program (.exe) — from 3,000 ₽ (4/5)
+- Special tasks / with AI — from 1,500 ₽ or personally (3/5)
+- Presentations on any topic (PDF and HTML) — from 100 ₽ (5/5)
 
 Conditions:
 
 - Websites — on a free domain. Paid domain — by agreement.
 - Deadlines — by agreement.
-- First, a test; after payment, the source code.
+- First test, after payment — source code.
+- Presentations — on any topics in PDF and HTML formats;
+  cost depends on the number of slides, amount of text
+  and design complexity.
+
 ==================================================
-contacts
+CONTACTS
 ==================================================
 
-Telegram: @elliotandersonela
+Telegram contact: @elliotandersonela
 Telegram channel: https://t.me/AutonombySa1DeN
 Website: https://itautonom.netlify.app/
-Githab: https://github.com/itautonom/AutonomIT
-Gmail: itautonom@gmail.com
+GitHub: https://github.com/itautonom/AutonomIT
+Email: itautonom@gmail.com
