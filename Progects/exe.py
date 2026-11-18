@@ -1,3 +1,5 @@
+#py -m auto_py_to_exe
+
 import tkinter as tk
 
 TEXT = """PORTFOLIO
