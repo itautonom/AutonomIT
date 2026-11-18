@@ -1,7 +1,5 @@
 # AutonomIT
-==================================================
 AUTONOM IT — REPOSITORY OVERVIEW
-==================================================
 
 AUTONOM is an IT team that creates websites, apps, software,
 games and AI solutions. We turn ideas into reality.
@@ -11,10 +9,7 @@ example projects.
 
 Repository: https://github.com/itautonom/AutonomIT
 
-
-==================================================
 1. REPOSITORY STRUCTURE
-==================================================
 
 AutonomIT-main/
 |
@@ -40,10 +35,7 @@ AutonomIT-main/
                            portfolio text with styled headings and
                            separators, scrolling and select-all.
 
-
-==================================================
 2. WHAT IS INSIDE
-==================================================
 
 Autonom_Portfolio/
   The same document in three languages. It describes:
@@ -62,10 +54,7 @@ Progects/exe.py
   Example of a Windows desktop program. The portfolio text is
   stored inside the script and shown in a scrollable window.
 
-
-==================================================
 3. HOW TO USE
-==================================================
 
 View the portfolio:
   Open any file from Autonom_Portfolio/ in a text editor.
@@ -83,10 +72,7 @@ Build a .exe file:
   3. Select Progects/exe.py, choose "One File" and
      "Window Based", then convert.
 
-
-==================================================
 4. CONTACTS
-==================================================
 
 Telegram:          @elliotandersonela
 Telegram channel:  https://t.me/AutonombySa1DeN
