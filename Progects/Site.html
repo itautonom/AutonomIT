@@ -1,0 +1,717 @@
+#https://itautonom.netlify.app/
+#https://zombixoffline.netlify.app/
+#https://avtokrankrasnodar.netlify.app/
+#https://webtestgamezoff.netlify.app/
+
+#free domain from Netlify
+
+#example of an HTML website
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<meta name="theme-color" content="#04060f" />
+<title>Solar System — 3D</title>
+
+<style>
+  *{box-sizing:border-box;}
+  html,body{height:100%;}
+  html{-webkit-text-size-adjust:100%;}
+  body{
+    margin:0;
+    background:radial-gradient(1200px 800px at 50% 0%, #0a1024 0%, #05070f 45%, #010205 100%);
+    color:#e9edf7;
+    font-family:'Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+    -webkit-font-smoothing:antialiased;
+    overflow:hidden;
+  }
+
+  #scene{
+    position:fixed; inset:0; display:block; width:100%; height:100%;
+    touch-action:none; z-index:0;
+  }
+
+  .vignette{
+    position:fixed; inset:0; z-index:1; pointer-events:none;
+    background:
+      radial-gradient(120% 90% at 50% 50%, transparent 40%, rgba(0,0,0,.55) 100%),
+      radial-gradient(60% 40% at 50% 100%, rgba(90,120,255,.06), transparent 70%);
+  }
+
+  #loader{
+    position:fixed; inset:0; z-index:200;
+    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:26px;
+    background:radial-gradient(circle at 50% 45%, #0a1124 0%, #03050c 70%);
+    transition:opacity .8s ease, visibility .8s ease;
+  }
+  #loader.hidden{opacity:0; visibility:hidden; pointer-events:none;}
+  .ring{
+    width:74px; height:74px; border-radius:50%;
+    border:1px solid rgba(140,170,220,.18);
+    border-top-color:#ffcb6b;
+    border-right-color:rgba(255,203,107,.35);
+    animation:spin 1.15s linear infinite;
+    box-shadow:0 0 40px rgba(255,203,107,.15);
+  }
+  @keyframes spin{to{transform:rotate(360deg);}}
+  #loader .lt{
+    font-family:'Space Grotesk',sans-serif;
+    font-size:11px; letter-spacing:.42em; text-transform:uppercase;
+    color:rgba(190,205,232,.65);
+  }
+
+  #hint{
+    position:fixed; left:50%; bottom:22px; z-index:20;
+    transform:translateX(-50%);
+    font-size:11.5px; letter-spacing:.12em; text-transform:uppercase;
+    color:rgba(170,188,220,.55);
+    text-align:center; white-space:nowrap; pointer-events:none;
+    transition:opacity 1s ease; padding:0 16px;
+  }
+  #hint.fade{opacity:0;}
+
+  @media (max-width:520px){
+    #hint{font-size:10px; letter-spacing:.08em; bottom:14px;}
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *{animation-duration:.001ms !important; transition-duration:.001ms !important;}
+  }
+</style>
+</head>
+<body>
+
+<canvas id="scene"></canvas>
+<div class="vignette"></div>
+
+<div id="loader">
+  <div class="ring"></div>
+  <div class="lt">Initializing</div>
+</div>
+
+<div id="hint">Drag — rotate · Scroll — zoom</div>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+  }
+}
+</script>
+
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+/* ─────────────────────────────────────────────────────────
+   NOISE & TEXTURES
+   ───────────────────────────────────────────────────────── */
+
+const hash3 = (x, y, z) => {
+  let n = Math.imul(x | 0, 374761393) + Math.imul(y | 0, 668265263) + Math.imul(z | 0, 1442695041);
+  n = Math.imul(n ^ (n >>> 13), 1274126177);
+  n = n ^ (n >>> 16);
+  return (n >>> 0) / 4294967296;
+};
+
+function vnoise(x, y, z) {
+  const ix = Math.floor(x), iy = Math.floor(y), iz = Math.floor(z);
+  const fx = x - ix, fy = y - iy, fz = z - iz;
+  const ux = fx * fx * (3 - 2 * fx);
+  const uy = fy * fy * (3 - 2 * fy);
+  const uz = fz * fz * (3 - 2 * fz);
+
+  const c000 = hash3(ix,     iy,     iz);
+  const c100 = hash3(ix + 1, iy,     iz);
+  const c010 = hash3(ix,     iy + 1, iz);
+  const c110 = hash3(ix + 1, iy + 1, iz);
+  const c001 = hash3(ix,     iy,     iz + 1);
+  const c101 = hash3(ix + 1, iy,     iz + 1);
+  const c011 = hash3(ix,     iy + 1, iz + 1);
+  const c111 = hash3(ix + 1, iy + 1, iz + 1);
+
+  const x00 = c000 + (c100 - c000) * ux;
+  const x10 = c010 + (c110 - c010) * ux;
+  const x01 = c001 + (c101 - c001) * ux;
+  const x11 = c011 + (c111 - c011) * ux;
+
+  const y0 = x00 + (x10 - x00) * uy;
+  const y1 = x01 + (x11 - x01) * uy;
+
+  return y0 + (y1 - y0) * uz;
+}
+
+function fbm(x, y, z, oct) {
+  let v = 0, a = 0.5, f = 1;
+  for (let i = 0; i < oct; i++) {
+    v += a * vnoise(x * f + i * 31.7, y * f + i * 17.3, z * f + i * 23.9);
+    f *= 2;
+    a *= 0.5;
+  }
+  return v;
+}
+
+const isMobile = window.matchMedia('(max-width: 820px), (pointer: coarse)').matches;
+const TEX_W = isMobile ? 96 : 128;
+const TEX_H = TEX_W / 2;
+
+/* ─────────────────────────────────────────────────────────
+   RENDERER / SCENE / CAMERA / CONTROLS
+   ───────────────────────────────────────────────────────── */
+
+const canvas = document.getElementById('scene');
+
+let renderer;
+try {
+  renderer = new THREE.WebGLRenderer({
+    canvas,
+    antialias: true,
+    powerPreference: 'high-performance'
+  });
+} catch (err) {
+  console.error('WebGL init failed', err);
+  const l = document.getElementById('loader');
+  if (l) {
+    const lt = l.querySelector('.lt');
+    const ring = l.querySelector('.ring');
+    if (ring) ring.style.display = 'none';
+    if (lt) lt.textContent = '3D is not supported by this browser';
+    setTimeout(() => { l.classList.add('hidden'); setTimeout(() => l.style.display = 'none', 900); }, 1500);
+  }
+  throw err;
+}
+
+renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.75));
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.18;
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 4000);
+
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true;
+controls.dampingFactor = 0.055;
+controls.enablePan = false;
+controls.minDistance = 9;
+controls.maxDistance = 90;
+controls.rotateSpeed = 0.62;
+controls.zoomSpeed = 0.85;
+controls.autoRotate = true;
+controls.autoRotateSpeed = 0.28;
+controls.minPolarAngle = Math.PI * 0.10;
+controls.maxPolarAngle = Math.PI * 0.86;
+
+function frameCamera() {
+  const aspect = window.innerWidth / window.innerHeight;
+  if (aspect < 0.85) {
+    camera.fov = 72;
+    camera.position.set(0, 40, 56);
+  } else if (aspect < 1.35) {
+    camera.fov = 60;
+    camera.position.set(0, 28, 44);
+  } else {
+    camera.fov = 50;
+    camera.position.set(0, 25, 41);
+  }
+  camera.aspect = aspect;
+  camera.updateProjectionMatrix();
+  controls.target.set(0, 0, 0);
+  controls.update();
+}
+frameCamera();
+
+/* ─────────────────────────────────────────────────────────
+   PROCEDURAL TEXTURES
+   ───────────────────────────────────────────────────────── */
+
+function makeGlowTexture(size = 128) {
+  const c = document.createElement('canvas');
+  c.width = c.height = size;
+  const ctx = c.getContext('2d');
+  const g = ctx.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, size / 2);
+  g.addColorStop(0.00, 'rgba(255,255,240,1)');
+  g.addColorStop(0.16, 'rgba(255,224,160,0.88)');
+  g.addColorStop(0.34, 'rgba(255,170,70,0.46)');
+  g.addColorStop(0.58, 'rgba(255,120,30,0.16)');
+  g.addColorStop(0.80, 'rgba(255,90,20,0.05)');
+  g.addColorStop(1.00, 'rgba(255,80,0,0)');
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, size, size);
+  const t = new THREE.CanvasTexture(c);
+  t.colorSpace = THREE.SRGBColorSpace;
+  return t;
+}
+
+function makeStarTexture(size = 32) {
+  const c = document.createElement('canvas');
+  c.width = c.height = size;
+  const ctx = c.getContext('2d');
+  const g = ctx.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, size / 2);
+  g.addColorStop(0, 'rgba(255,255,255,1)');
+  g.addColorStop(0.35, 'rgba(255,255,255,0.55)');
+  g.addColorStop(1, 'rgba(255,255,255,0)');
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, size, size);
+  const t = new THREE.CanvasTexture(c);
+  t.colorSpace = THREE.SRGBColorSpace;
+  return t;
+}
+
+function buildSurfaceTexture(def, w, h) {
+  const c = document.createElement('canvas');
+  c.width = w; c.height = h;
+  const ctx = c.getContext('2d');
+  const img = ctx.createImageData(w, h);
+  const d = img.data;
+
+  const { seed, scale, octaves, shade } = def;
+  const off = seed * 13.7;
+
+  for (let y = 0; y < h; y++) {
+    const v = y / h;
+    const phi = v * Math.PI;
+    const sp = Math.sin(phi);
+    const cp = Math.cos(phi);
+    const lat = cp;
+
+    for (let x = 0; x < w; x++) {
+      const u = x / w;
+      const th = u * Math.PI * 2;
+      const dx = sp * Math.cos(th);
+      const dy = cp;
+      const dz = sp * Math.sin(th);
+
+      const n = fbm(dx * scale + off, dy * scale + off, dz * scale + off, octaves);
+      const col = shade(n, lat, u, v);
+
+      const i = (y * w + x) * 4;
+      d[i]     = col[0];
+      d[i + 1] = col[1];
+      d[i + 2] = col[2];
+      d[i + 3] = 255;
+    }
+  }
+
+  ctx.putImageData(img, 0, 0);
+  const tex = new THREE.CanvasTexture(c);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  tex.wrapS = THREE.RepeatWrapping;
+  tex.anisotropy = renderer.capabilities.getMaxAnisotropy();
+  return tex;
+}
+
+function makeSunTexture(w = TEX_W, h = TEX_H) {
+  const c = document.createElement('canvas');
+  c.width = w; c.height = h;
+  const ctx = c.getContext('2d');
+  const img = ctx.createImageData(w, h);
+  const d = img.data;
+
+  for (let y = 0; y < h; y++) {
+    const v = y / h;
+    const phi = v * Math.PI;
+    const sp = Math.sin(phi);
+    const cp = Math.cos(phi);
+
+    for (let x = 0; x < w; x++) {
+      const u = x / w;
+      const th = u * Math.PI * 2;
+      const dx = sp * Math.cos(th);
+      const dy = cp;
+      const dz = sp * Math.sin(th);
+
+      const n = fbm(dx * 4.2 + 11, dy * 4.2 + 7, dz * 4.2 + 3, 3);
+      const t = Math.pow(n, 1.35);
+
+      const i = (y * w + x) * 4;
+      d[i]     = 255;
+      d[i + 1] = 140 + t * 115;
+      d[i + 2] = 30 + t * 100;
+      d[i + 3] = 255;
+    }
+  }
+
+  ctx.putImageData(img, 0, 0);
+  const tex = new THREE.CanvasTexture(c);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  tex.anisotropy = renderer.capabilities.getMaxAnisotropy();
+  return tex;
+}
+
+function makeCloudTexture(w = TEX_W, h = TEX_H) {
+  const c = document.createElement('canvas');
+  c.width = w; c.height = h;
+  const ctx = c.getContext('2d');
+  const img = ctx.createImageData(w, h);
+  const d = img.data;
+
+  for (let y = 0; y < h; y++) {
+    const v = y / h;
+    const phi = v * Math.PI;
+    const sp = Math.sin(phi);
+    const cp = Math.cos(phi);
+
+    for (let x = 0; x < w; x++) {
+      const u = x / w;
+      const th = u * Math.PI * 2;
+      const dx = sp * Math.cos(th);
+      const dy = cp;
+      const dz = sp * Math.sin(th);
+
+      const n = fbm(dx * 3.4 + 55, dy * 3.4 + 21, dz * 3.4 + 91, 3);
+      const a = Math.max(0, Math.min(1, (n - 0.52) * 3.4));
+
+      const i = (y * w + x) * 4;
+      d[i]     = 255;
+      d[i + 1] = 255;
+      d[i + 2] = 255;
+      d[i + 3] = a * 235;
+    }
+  }
+
+  ctx.putImageData(img, 0, 0);
+  const tex = new THREE.CanvasTexture(c);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  tex.wrapS = THREE.RepeatWrapping;
+  return tex;
+}
+
+/* ─────────────────────────────────────────────────────────
+   STARS
+   ───────────────────────────────────────────────────────── */
+
+let starField = null;
+
+(function buildStars() {
+  const count = isMobile ? 1600 : 4200;
+  const pos = new Float32Array(count * 3);
+  const col = new Float32Array(count * 3);
+
+  const palette = [
+    [0.72, 0.82, 1.00],
+    [0.92, 0.95, 1.00],
+    [1.00, 0.95, 0.84],
+    [1.00, 0.86, 0.68],
+    [0.80, 0.90, 1.00]
+  ];
+
+  for (let i = 0; i < count; i++) {
+    const r = 320 + Math.random() * 900;
+    const theta = Math.random() * Math.PI * 2;
+    const phi = Math.acos(2 * Math.random() - 1);
+
+    pos[i * 3]     = r * Math.sin(phi) * Math.cos(theta);
+    pos[i * 3 + 1] = r * Math.cos(phi);
+    pos[i * 3 + 2] = r * Math.sin(phi) * Math.sin(theta);
+
+    const p = palette[(Math.random() * palette.length) | 0];
+    const k = 0.5 + Math.random() * 0.55;
+    col[i * 3]     = p[0] * k;
+    col[i * 3 + 1] = p[1] * k;
+    col[i * 3 + 2] = p[2] * k;
+  }
+
+  const g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+  g.setAttribute('color', new THREE.BufferAttribute(col, 3));
+
+  const m = new THREE.PointsMaterial({
+    size: 2.7,
+    map: makeStarTexture(),
+    vertexColors: true,
+    transparent: true,
+    depthWrite: false,
+    blending: THREE.AdditiveBlending,
+    sizeAttenuation: true,
+    opacity: 0.98
+  });
+
+  starField = new THREE.Points(g, m);
+  scene.add(starField);
+})();
+
+/* ─────────────────────────────────────────────────────────
+   SUN
+   ───────────────────────────────────────────────────────── */
+
+const SUN_RADIUS = 3.1;
+
+const sun = new THREE.Mesh(
+  new THREE.SphereGeometry(SUN_RADIUS, 64, 48),
+  new THREE.MeshBasicMaterial({ map: makeSunTexture() })
+);
+scene.add(sun);
+
+const glowTex = makeGlowTexture(128);
+const sunGlowBase = [12.5, 20, 34];
+const sunGlows = [];
+
+sunGlowBase.forEach((s, i) => {
+  const sp = new THREE.Sprite(new THREE.SpriteMaterial({
+    map: glowTex,
+    color: 0xffbe63,
+    transparent: true,
+    opacity: [0.62, 0.30, 0.14][i],
+    blending: THREE.AdditiveBlending,
+    depthWrite: false
+  }));
+  sp.scale.setScalar(s);
+  sp.userData.base = s;
+  scene.add(sp);
+  sunGlows.push(sp);
+});
+
+const sunLight = new THREE.PointLight(0xffd9a8, 4.3, 0, 0);
+sunLight.position.set(0, 0, 0);
+scene.add(sunLight);
+
+scene.add(new THREE.AmbientLight(0x3f5878, 0.58));
+
+const rimLight = new THREE.DirectionalLight(0x7aa8e8, 0.55);
+rimLight.position.set(-20, 12, -20);
+scene.add(rimLight);
+
+const hemi = new THREE.HemisphereLight(0x4a6a9a, 0x1a1024, 0.35);
+scene.add(hemi);
+
+/* ─────────────────────────────────────────────────────────
+   PLANETS
+   ───────────────────────────────────────────────────────── */
+
+const PLANET_DEFS = [
+  {
+    dist: 8.6,
+    radius: 0.95,
+    tilt: 0.06,
+    orbitSpeed: 0.150,
+    spinSpeed: 0.42,
+    seed: 3,
+    scale: 2.4,
+    octaves: 3,
+    shade: (n) => {
+      const t = n;
+      return [45 + t * 165, 50 + t * 160, 62 + t * 170];
+    }
+  },
+  {
+    dist: 11.9,
+    radius: 1.12,
+    tilt: 0.14,
+    orbitSpeed: 0.108,
+    spinSpeed: -0.28,
+    seed: 7,
+    scale: 2.1,
+    octaves: 3,
+    shade: (n, lat, u, v) => {
+      const band = Math.sin(v * Math.PI * 9) * 0.5 + 0.5;
+      const t = n * 0.68 + band * 0.32;
+      return [150 + t * 105, 92 + t * 120, 42 + t * 96];
+    }
+  },
+  {
+    dist: 15.4,
+    radius: 1.22,
+    tilt: 0.20,
+    orbitSpeed: 0.078,
+    spinSpeed: 0.36,
+    seed: 12,
+    scale: 2.0,
+    octaves: 3,
+    clouds: true,
+    shade: (n, lat) => {
+      const ice = Math.max(0, (Math.abs(lat) - 0.70) / 0.30);
+      let r, g, b;
+      if (n < 0.48) {
+        const t = n / 0.48;
+        r = 14 + t * 30;
+        g = 40 + t * 78;
+        b = 92 + t * 78;
+      } else {
+        const t = (n - 0.48) / 0.52;
+        r = 42 + t * 112;
+        g = 98 + t * 78;
+        b = 48 + t * 34;
+        if (n > 0.71) {
+          r = 178 + t * 54;
+          g = 152 + t * 54;
+          b = 96 + t * 44;
+        }
+      }
+      r += (244 - r) * ice;
+      g += (248 - g) * ice;
+      b += (255 - b) * ice;
+      return [r, g, b];
+    }
+  },
+  {
+    dist: 19.2,
+    radius: 1.02,
+    tilt: 0.10,
+    orbitSpeed: 0.058,
+    spinSpeed: 0.30,
+    seed: 21,
+    scale: 2.6,
+    octaves: 3,
+    shade: (n, lat) => {
+      const ice = Math.max(0, (Math.abs(lat) - 0.83) / 0.17);
+      let t = n;
+      let r = 110 + t * 140;
+      let g = 48 + t * 94;
+      let b = 30 + t * 66;
+      r += (240 - r) * ice;
+      g += (240 - g) * ice;
+      b += (250 - b) * ice;
+      return [r, g, b];
+    }
+  }
+];
+
+const planets = [];
+
+function makeOrbitRing(radius) {
+  const geo = new THREE.RingGeometry(radius - 0.014, radius + 0.014, 160);
+  const mat = new THREE.MeshBasicMaterial({
+    color: 0x6f9edb,
+    transparent: true,
+    opacity: 0.20,
+    side: THREE.DoubleSide,
+    depthWrite: false
+  });
+  const ring = new THREE.Mesh(geo, mat);
+  ring.rotation.x = -Math.PI / 2;
+  return ring;
+}
+
+PLANET_DEFS.forEach((def) => {
+  const pivot = new THREE.Object3D();
+  pivot.rotation.y = Math.random() * Math.PI * 2;
+  scene.add(pivot);
+
+  const holder = new THREE.Object3D();
+  holder.position.x = def.dist;
+  pivot.add(holder);
+
+  const tex = buildSurfaceTexture(def, TEX_W, TEX_H);
+
+  const mat = new THREE.MeshStandardMaterial({
+    map: tex,
+    roughness: 0.82,
+    metalness: 0.06,
+    emissive: new THREE.Color(0x000000)
+  });
+
+  const mesh = new THREE.Mesh(new THREE.SphereGeometry(def.radius, 48, 32), mat);
+  mesh.rotation.z = def.tilt;
+  holder.add(mesh);
+
+  let clouds = null;
+  if (def.clouds) {
+    const ctex = makeCloudTexture(TEX_W, TEX_H);
+    clouds = new THREE.Mesh(
+      new THREE.SphereGeometry(def.radius * 1.016, 36, 24),
+      new THREE.MeshStandardMaterial({
+        map: ctex,
+        transparent: true,
+        opacity: 0.58,
+        depthWrite: false,
+        roughness: 1,
+        metalness: 0
+      })
+    );
+    holder.add(clouds);
+  }
+
+  const ring = makeOrbitRing(def.dist);
+  scene.add(ring);
+
+  planets.push({ def, pivot, holder, mesh, clouds });
+});
+
+/* ─────────────────────────────────────────────────────────
+   ANIMATION
+   ───────────────────────────────────────────────────────── */
+
+const clock = new THREE.Clock();
+let elapsed = 0;
+let autoRotateIdle = null;
+
+function animate() {
+  requestAnimationFrame(animate);
+
+  const dt = Math.min(clock.getDelta(), 0.05);
+  elapsed += dt;
+
+  controls.update();
+
+  sun.rotation.y += dt * 0.045;
+
+  const breathe = 1 + Math.sin(elapsed * 1.1) * 0.022;
+  sunGlows[0].scale.setScalar(sunGlows[0].userData.base * breathe);
+  sunGlows[1].scale.setScalar(sunGlows[1].userData.base * (1 + Math.sin(elapsed * 0.9) * 0.014));
+  sunGlows[2].scale.setScalar(sunGlows[2].userData.base);
+
+  for (const p of planets) {
+    p.pivot.rotation.y += p.def.orbitSpeed * dt;
+    p.mesh.rotation.y += p.def.spinSpeed * dt;
+    if (p.clouds) p.clouds.rotation.y += p.def.spinSpeed * dt * 1.35;
+  }
+
+  if (starField) starField.rotation.y += dt * 0.0035;
+
+  renderer.render(scene, camera);
+}
+
+renderer.render(scene, camera);
+animate();
+
+/* ─────────────────────────────────────────────────────────
+   RESIZE / AUTO-ROTATE / LOADER
+   ───────────────────────────────────────────────────────── */
+
+let resizeRaf = null;
+window.addEventListener('resize', () => {
+  if (resizeRaf) cancelAnimationFrame(resizeRaf);
+  resizeRaf = requestAnimationFrame(() => {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.75));
+    renderer.setSize(window.innerWidth, window.innerHeight);
+  });
+});
+
+controls.addEventListener('start', () => {
+  controls.autoRotate = false;
+  if (autoRotateIdle) clearTimeout(autoRotateIdle);
+});
+controls.addEventListener('end', () => {
+  if (autoRotateIdle) clearTimeout(autoRotateIdle);
+  autoRotateIdle = setTimeout(() => {
+    controls.autoRotate = true;
+  }, 8000);
+});
+
+requestAnimationFrame(() => {
+  requestAnimationFrame(() => {
+    const loader = document.getElementById('loader');
+    if (!loader) return;
+    loader.classList.add('hidden');
+    setTimeout(() => { loader.style.display = 'none'; }, 900);
+  });
+});
+
+setTimeout(() => {
+  const hint = document.getElementById('hint');
+  if (hint) hint.classList.add('fade');
+}, 9000);
+
+window.addEventListener('error', function (e) {
+  console.error('[Solar]', e.message || e.error);
+});
+</script>
+</body>
+</html>
